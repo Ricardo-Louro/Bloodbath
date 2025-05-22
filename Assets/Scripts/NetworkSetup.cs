@@ -12,6 +12,8 @@ using System.Linq;
 
 #if UNITY_EDITOR
 using UnityEditor.Build.Reporting;
+using Unity.VisualScripting;
+
 #endif
 
 #if UNITY_STANDALONE_WIN
@@ -20,6 +22,9 @@ using System.Runtime.InteropServices;
 
 public class NetworkSetup : MonoBehaviour
 {
+    [SerializeField] private Player playerPrefab;
+    [SerializeField] private Transform[] spawnPoints;
+
     private bool isServer = false;
 
     void Start()
@@ -56,6 +61,9 @@ public class NetworkSetup : MonoBehaviour
         {
             SetWindowTitle("Server");
             UnityEngine.Debug.Log($"Serving on port {transport.ConnectionData.Port}...");
+
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
         }
         else
         {
@@ -85,6 +93,40 @@ public class NetworkSetup : MonoBehaviour
             SetWindowTitle("Failed to connect as client...");
             UnityEngine.Debug.LogError($"Failed to connect on port {transport.ConnectionData.Port}...");
         }
+    }
+
+    private void OnClientConnected(ulong clientId)
+    {
+        if (!NetworkManager.Singleton.IsServer) return;
+
+        UnityEngine.Debug.Log($"Player {clientId} connected, prefab index = {playerPrefab}!");
+
+        // Check a free spot for this player
+        var spawnPos = Vector3.zero;
+        var currentPlayers = FindObjectsByType<Player>(FindObjectsSortMode.None);
+        foreach (var playerSpawnLocation in spawnPoints)
+        {
+            var closestDist = float.MaxValue;
+            foreach (var player in currentPlayers)
+            {
+                float d = Vector3.Distance(player.transform.position, playerSpawnLocation.position);
+                closestDist = Mathf.Min(closestDist, d);
+            }
+            if (closestDist > 20)
+            {
+                spawnPos = playerSpawnLocation.position;
+                break;
+            }
+        }
+        // Spawn player object
+        var spawnedObject = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
+        var prefabNetworkObject = spawnedObject.GetComponent<NetworkObject>();
+        prefabNetworkObject.SpawnAsPlayerObject(clientId, true);
+        prefabNetworkObject.ChangeOwnership(clientId);
+    }
+    private void OnClientDisconnected(ulong clientId)
+    {
+        UnityEngine.Debug.Log($"Player {clientId} disconnected!");
     }
 
 #if UNITY_STANDALONE_WIN
