@@ -1,18 +1,17 @@
 using Unity.Netcode;
 using UnityEngine;
 
-public class HPBubble : MonoBehaviour
+public class HPBubble : NetworkBehaviour
 {
     private NetworkManager networkManager;
     private MeshRenderer meshRenderer;
     private SphereCollider sphereCollider;
 
-    private bool active;
-    private float pickupTime = 0;
+    private NetworkVariable<bool> active = new NetworkVariable<bool>();
+    private NetworkVariable<float> pickupTime = new NetworkVariable<float>();
+
     [SerializeField] private float spawnCooldown; 
 
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Start()
     {
         networkManager = FindFirstObjectByType<NetworkManager>();
@@ -20,35 +19,34 @@ public class HPBubble : MonoBehaviour
         meshRenderer = GetComponent<MeshRenderer>();
         sphereCollider = GetComponent<SphereCollider>();
 
-        active = true;
+        active.Value = true;
+
+        active.OnValueChanged += ToggleStatus;
     }
 
     private void Update()
     {
-        if(networkManager.IsHost || networkManager.IsServer)
+        if (networkManager.IsHost || networkManager.IsServer)
         {
-            CheckForSpawn();
+            if (!active.Value && Time.time - pickupTime.Value >= spawnCooldown)
+            {
+                active.Value = true;
+            }
         }
     }
 
-    private void CheckForSpawn()
+    private void ToggleStatus(bool previousValue, bool newValue)
     {
-        if(!active && Time.time - pickupTime >= spawnCooldown)
-        {
-            meshRenderer.enabled = true;
-            sphereCollider.enabled = true;
-        }
+        meshRenderer.enabled = active.Value;
+        sphereCollider.enabled = active.Value;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.GetComponent<Player>() != null)
+        if(other.GetComponent<Player>() != null && (networkManager.IsHost || networkManager.IsServer))
         {
-            meshRenderer.enabled = false;
-            sphereCollider.enabled = false;
-
-            active = false;
-            pickupTime = Time.time;
+            active.Value = false;
+            pickupTime.Value = Time.time;
         }
     }
 }

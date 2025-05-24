@@ -100,7 +100,7 @@ public class NetworkSetup : MonoBehaviour
         if (!NetworkManager.Singleton.IsServer) return;
 
         UnityEngine.Debug.Log($"Player {clientId} connected, prefab index = {playerPrefab}!");
-
+        /*
         // Check a free spot for this player
         var spawnPos = Vector3.zero;
         var currentPlayers = FindObjectsByType<Player>(FindObjectsSortMode.None);
@@ -123,6 +123,7 @@ public class NetworkSetup : MonoBehaviour
         var prefabNetworkObject = spawnedObject.GetComponent<NetworkObject>();
         prefabNetworkObject.SpawnAsPlayerObject(clientId, true);
         prefabNetworkObject.ChangeOwnership(clientId);
+        */
     }
     private void OnClientDisconnected(ulong clientId)
     {
