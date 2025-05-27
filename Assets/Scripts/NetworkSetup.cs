@@ -6,6 +6,7 @@ using Unity.Netcode.Transports.UTP;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 using UnityEditor;
 using System.Linq;
@@ -13,6 +14,16 @@ using System.Linq;
 #if UNITY_EDITOR
 using UnityEditor.Build.Reporting;
 using Unity.VisualScripting;
+using TMPro;
+using Debug = UnityEngine.Debug;
+using Unity.Services.Authentication;
+
+using Unity.Services.Core;
+using Unity.Services.Relay.Models;
+
+
+
+
 
 #endif
 
@@ -22,8 +33,28 @@ using System.Runtime.InteropServices;
 
 public class NetworkSetup : MonoBehaviour
 {
+    public class RelayHostData
+    {
+        public string JoinCode;
+        public string IPv4Address;
+        public ushort Port;
+        public Guid AllocationID;
+        public byte[] AllocationIDBytes;
+        public byte[] ConnectionData;
+        public byte[] HostConnectionData;
+        public byte[] Key;
+    }
+
     [SerializeField] private Player playerPrefab;
     [SerializeField] private Transform[] spawnPoints;
+
+    UnityTransport transport;
+    bool isRelay = false;
+    TextMeshProUGUI textJoinCode;
+    RelayHostData relayData;
+
+    //PERHAPS DUE TO HOSTING, IT MIGHT BE NEEDED TO BE 1 MORE
+    int maxPlayers = 1;
 
     private bool isServer = false;
 
@@ -40,36 +71,154 @@ public class NetworkSetup : MonoBehaviour
             }
         }
 
+        transport = GetComponent<UnityTransport>();
+        if (transport.Protocol == UnityTransport.ProtocolType.RelayUnityTransport)
+        {
+            isRelay = true;
+        }
+        else
+        {
+            textJoinCode.gameObject.SetActive(false);
+        }
+
         if (isServer)
             StartCoroutine(StartAsServerCR());
         else
             StartCoroutine(StartAsClientCR());
     }
 
+
     IEnumerator StartAsServerCR()
     {
-        SetWindowTitle("Starting up as server...");
+        SetWindowTitle("MPWyzard (server mode)");
+
         var networkManager = GetComponent<NetworkManager>();
         networkManager.enabled = true;
-        var transport = GetComponent<UnityTransport>();
         transport.enabled = true;
+
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
 
         // Wait a frame for setups to be done
         yield return null;
 
-        if (networkManager.StartServer())
+        if (isRelay)
         {
-            SetWindowTitle("Server");
-            UnityEngine.Debug.Log($"Serving on port {transport.ConnectionData.Port}...");
+            var loginTask = Login();
 
-            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
-            NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+            yield return new WaitUntil(() => loginTask.IsCompleted);
+
+            if (loginTask.Exception != null)
+            {
+                Debug.LogError("Login failed: " + loginTask.Exception);
+                yield break;
+            }
+
+            Debug.Log("Login successfull!");
+
+            var allocationTask = CreateAllocationAsync(maxPlayers);
+
+            yield return new WaitUntil(() => allocationTask.IsCompleted);
+
+            if (allocationTask.Exception != null)
+            {
+                Debug.LogError("Allocation failed: " + allocationTask.Exception);
+                yield break;
+            }
+            else
+            {
+                Debug.Log("Allocation successfull!");
+
+                // Fetch result of the task
+                Allocation allocation = allocationTask.Result;
+
+                relayData = new RelayHostData();
+
+                // Find the appropriate endpoint, just select the first one and use it
+                foreach (var endpoint in allocation.ServerEndpoints)
+                {
+                    relayData.IPv4Address = endpoint.Host;
+                    relayData.Port = (ushort)endpoint.Port;
+                    break;
+                }
+
+                relayData.AllocationID = allocation.AllocationId;
+                relayData.AllocationIDBytes = allocation.AllocationIdBytes;
+                relayData.ConnectionData = allocation.ConnectionData;
+                relayData.Key = allocation.Key;
+
+                var joinCodeTask = GetJoinCodeAsync(relayData.AllocationID);
+
+                yield return new WaitUntil(() => joinCodeTask.IsCompleted);
+
+                if (joinCodeTask.Exception != null)
+                {
+                    Debug.LogError("Join code failed: " + joinCodeTask.Exception);
+                    yield break;
+                }
+                else
+                {
+                    Debug.Log("Code retrieved!");
+
+                    relayData.JoinCode = joinCodeTask.Result;
+
+                    if (textJoinCode != null)
+                    {
+                        textJoinCode.text = $"JoinCode:{relayData.JoinCode}";
+                        textJoinCode.gameObject.SetActive(true);
+                    }
+                }
+            }
         }
-        else
+    }
+
+    private async Task<Allocation> CreateAllocationAsync(int maxPlayers)
+    {
+        try
         {
-            SetWindowTitle("Failed to connect as server...");
-            UnityEngine.Debug.LogError($"Failed to serve on port {transport.ConnectionData.Port}...");
+            // This requests space for maxPlayers + 1 connections (the +1 is for the server itself)
+            Allocation allocation = await Unity.Services.Relay.RelayService.Instance.CreateAllocationAsync(maxPlayers);
+            return allocation;
         }
+        catch (System.Exception e)
+        {
+            Debug.LogError("Error creating allocation: " + e);
+            throw;
+        }
+    }
+
+    private async Task<string> GetJoinCodeAsync(Guid allocationID)
+    {
+        try
+        {
+            string code = await Unity.Services.Relay.RelayService.Instance.GetJoinCodeAsync(allocationID);
+            return code;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("Error retrieving join code: " + e);
+            throw;
+        }
+    }
+
+
+    private async Task<bool> Login()
+    {
+        try
+        {
+            await UnityServices.InitializeAsync();
+            if (!AuthenticationService.Instance.IsSignedIn)
+            {
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("Error login: " + e);
+            throw;
+        }
+
+        return true;
     }
 
     IEnumerator StartAsClientCR()
