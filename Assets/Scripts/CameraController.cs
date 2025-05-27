@@ -4,7 +4,7 @@ public class CameraController : MonoBehaviour
 {
     [SerializeField] private float heightOffset;
     [SerializeField] private float mouseSens;
-    public Player player;
+    public PlayerMovement player;
 
     private Vector3 rotation;
 

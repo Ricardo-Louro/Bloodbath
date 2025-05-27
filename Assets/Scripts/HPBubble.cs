@@ -43,7 +43,7 @@ public class HPBubble : NetworkBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.GetComponent<Player>() != null && (networkManager.IsHost || networkManager.IsServer))
+        if(other.GetComponent<PlayerMovement>() != null && (networkManager.IsHost || networkManager.IsServer))
         {
             active.Value = false;
             pickupTime.Value = Time.time;

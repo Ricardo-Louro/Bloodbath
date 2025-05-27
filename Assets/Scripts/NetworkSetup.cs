@@ -41,7 +41,7 @@ public class NetworkSetup : MonoBehaviour
         public byte[] Key;
     }
 
-    [SerializeField] private Player playerPrefab;
+    [SerializeField] private GameObject playerPrefab;
     [SerializeField] private Transform[] spawnPoints;
     [SerializeField] TextMeshProUGUI textJoinCode;
     [SerializeField] private string joinCode;

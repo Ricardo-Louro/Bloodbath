@@ -1,10 +1,15 @@
-using Unity.Netcode;
 using UnityEngine;
+using Unity.Netcode;
 
-public class Player : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
     private Rigidbody rb;
+    
     [SerializeField] private float moveSpeed;
+    [SerializeField] private float jumpSpeed;
+
+    public bool grounded;
+    private bool jump;
 
     private NetworkObject networkObject;
 
@@ -17,12 +22,19 @@ public class Player : MonoBehaviour
         if (networkObject.IsLocalPlayer)
         {
             AssignCamera();
+            AssignLocalPlayer();
         }
     }
 
-    // Update is called once per frame
     private void Update()
     {
+        if(networkObject.IsLocalPlayer)
+        {
+            if (grounded && Input.GetKeyDown(KeyCode.Space))
+            {
+                jump = true;
+            }
+        }
     }
 
     private void FixedUpdate()
@@ -34,6 +46,16 @@ public class Player : MonoBehaviour
 
             vel = vel.normalized * moveSpeed;
 
+            if(jump)
+            {
+                vel.y = jumpSpeed;
+                jump = false;
+            }
+            else
+            {
+                vel.y = rb.linearVelocity.y;
+            }
+
             rb.linearVelocity = vel;
         }
     }
@@ -41,6 +63,12 @@ public class Player : MonoBehaviour
     private void AssignCamera()
     {
         Camera.main.GetComponent<CameraController>().player = this;
+    }
+
+    private void AssignLocalPlayer()
+    {
+        //Disable rendered body (works best for 1st person)
+        GetComponentInChildren<SkinnedMeshRenderer>().enabled = false;
     }
 
     public void Rotate(float yRot)
