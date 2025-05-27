@@ -11,9 +11,6 @@ using System.Threading.Tasks;
 using UnityEditor;
 using System.Linq;
 
-#if UNITY_EDITOR
-using UnityEditor.Build.Reporting;
-using Unity.VisualScripting;
 using TMPro;
 using Debug = UnityEngine.Debug;
 using Unity.Services.Authentication;
@@ -21,10 +18,9 @@ using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Relay.Models;
 
-
-
-
-
+#if UNITY_EDITOR
+using UnityEditor.Build.Reporting;
+using Unity.VisualScripting;
 #endif
 
 #if UNITY_STANDALONE_WIN
@@ -47,16 +43,17 @@ public class NetworkSetup : MonoBehaviour
 
     [SerializeField] private Player playerPrefab;
     [SerializeField] private Transform[] spawnPoints;
+    [SerializeField] TextMeshProUGUI textJoinCode;
+    [SerializeField] private string joinCode;
 
     UnityTransport transport;
     bool isRelay = false;
-    TextMeshProUGUI textJoinCode;
     RelayHostData relayData;
 
     //PERHAPS DUE TO HOSTING, IT MIGHT BE NEEDED TO BE 1 MORE
     int maxPlayers = 1;
 
-    private bool isServer = false;
+    [SerializeField] private bool isServer = false;
 
     void Start()
     {
@@ -69,7 +66,12 @@ public class NetworkSetup : MonoBehaviour
                 // --server found, this should be a server application
                 isServer = true;
             }
+            else if (args[i] == "--code")
+            {
+                joinCode = ((i + 1) < args.Length) ? (args[i + 1]) : ("");
+            }
         }
+
 
         transport = GetComponent<UnityTransport>();
         if (transport.Protocol == UnityTransport.ProtocolType.RelayUnityTransport)
@@ -167,9 +169,22 @@ public class NetworkSetup : MonoBehaviour
                         textJoinCode.text = $"JoinCode:{relayData.JoinCode}";
                         textJoinCode.gameObject.SetActive(true);
                     }
+
+                    transport.SetRelayServerData(relayData.IPv4Address, relayData.Port, relayData.AllocationIDBytes,
+                                                 relayData.Key, relayData.ConnectionData);
                 }
             }
         }
+
+        if (networkManager.StartServer())
+        {
+            Debug.Log($"Serving on port {transport.ConnectionData.Port}...");
+        }
+        else
+        {
+            Debug.LogError($"Failed to serve on port {transport.ConnectionData.Port}...");
+        }
+
     }
 
     private async Task<Allocation> CreateAllocationAsync(int maxPlayers)
@@ -232,15 +247,80 @@ public class NetworkSetup : MonoBehaviour
         // Wait a frame for setups to be done
         yield return null;
 
+        if (isRelay)
+        {
+            var loginTask = Login();
+
+            yield return new WaitUntil(() => loginTask.IsCompleted);
+
+            if (loginTask.Exception != null)
+            {
+                Debug.LogError("Login failed: " + loginTask.Exception);
+                yield break;
+            }
+
+            Debug.Log("Login successfull!");
+
+            var joinAllocationTask = JoinAllocationAsync(joinCode);
+
+            yield return new WaitUntil(() => joinAllocationTask.IsCompleted);
+
+            if (joinAllocationTask.Exception != null)
+            {
+                Debug.LogError("Join allocation failed: " + joinAllocationTask.Exception);
+                yield break;
+            }
+            else
+            {
+                Debug.Log("Allocation joined!");
+
+                relayData = new RelayHostData();
+
+                var allocation = joinAllocationTask.Result;
+
+                // Find the appropriate endpoint, just select the first one and use it
+                foreach (var endpoint in allocation.ServerEndpoints)
+                {
+                    relayData.IPv4Address = endpoint.Host;
+                    relayData.Port = (ushort)endpoint.Port;
+                    break;
+                }
+
+                relayData.AllocationID = allocation.AllocationId;
+                relayData.AllocationIDBytes = allocation.AllocationIdBytes;
+                relayData.ConnectionData = allocation.ConnectionData;
+                relayData.HostConnectionData = allocation.HostConnectionData;
+                relayData.Key = allocation.Key;
+
+                transport.SetRelayServerData(relayData.IPv4Address, relayData.Port,
+                                                relayData.AllocationIDBytes, relayData.Key, relayData.ConnectionData,
+                                                relayData.HostConnectionData);
+            }
+        }
+
         if (networkManager.StartClient())
         {
-            SetWindowTitle("Client");
-            UnityEngine.Debug.LogError($"Connecting on port {transport.ConnectionData.Port}...");
+            Debug.Log($"Connecting on port {transport.ConnectionData.Port}...");
         }
         else
         {
-            SetWindowTitle("Failed to connect as client...");
-            UnityEngine.Debug.LogError($"Failed to connect on port {transport.ConnectionData.Port}...");
+            Debug.LogError($"Failed to connect on port {transport.ConnectionData.Port}...");
+        }
+    }
+
+    private async Task<JoinAllocation> JoinAllocationAsync(string joinCode)
+    {
+        try
+        {
+            // This requests space for maxPlayers + 1 connections (the +1 is for the server itself)
+            var allocation = await Unity.Services.Relay.RelayService.Instance.JoinAllocationAsync(joinCode);
+
+            return allocation;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("Error joining allocation: " + e);
+            throw;
         }
     }
 
