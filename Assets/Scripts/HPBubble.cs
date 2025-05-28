@@ -43,10 +43,17 @@ public class HPBubble : NetworkBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.GetComponent<PlayerMovement>() != null && (networkManager.IsHost || networkManager.IsServer))
-        {
-            active.Value = false;
-            pickupTime.Value = Time.time;
+        if (networkManager.IsHost || networkManager.IsServer)
+        {            
+            HealthSystem healthSystem = other.GetComponent<HealthSystem>();
+            if(healthSystem != null)
+            {
+                if (healthSystem.currentHealth.Value < healthSystem.maxHealth)
+                {
+                    active.Value = false;
+                    pickupTime.Value = Time.time;
+                }
+            }
         }
     }
 }
