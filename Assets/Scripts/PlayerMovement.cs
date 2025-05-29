@@ -8,6 +8,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float moveSpeed;
     [SerializeField] private float jumpSpeed;
 
+    [SerializeField] private MeshRenderer gunRenderer;
+
     public bool grounded;
     private bool jump;
 
@@ -69,6 +71,9 @@ public class PlayerMovement : MonoBehaviour
     {
         //Disable rendered body (works best for 1st person)
         GetComponentInChildren<SkinnedMeshRenderer>().enabled = false;
+        gunRenderer.enabled = false;
+
+        gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
     }
 
     public void Rotate(float yRot)
