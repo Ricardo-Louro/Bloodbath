@@ -1,15 +1,14 @@
 using Unity.Netcode;
 using UnityEngine;
 
-public class HPBubble : NetworkBehaviour
+public abstract class Pickable : NetworkBehaviour
 {
     private NetworkManager networkManager;
     private MeshRenderer meshRenderer;
-    private SphereCollider sphereCollider;
+    private new Collider collider;
 
     private NetworkVariable<bool> active = new NetworkVariable<bool>();
-    private NetworkVariable<float> pickupTime = new NetworkVariable<float>();
-
+    private float pickupTime;
     [SerializeField] private float spawnCooldown; 
 
     private void Start()
@@ -17,7 +16,7 @@ public class HPBubble : NetworkBehaviour
         networkManager = FindFirstObjectByType<NetworkManager>();
         
         meshRenderer = GetComponent<MeshRenderer>();
-        sphereCollider = GetComponent<SphereCollider>();
+        collider = GetComponent<Collider>();
 
         active.Value = true;
 
@@ -28,7 +27,7 @@ public class HPBubble : NetworkBehaviour
     {
         if (networkManager.IsHost || networkManager.IsServer)
         {
-            if (!active.Value && Time.time - pickupTime.Value >= spawnCooldown)
+            if (!active.Value && Time.time - pickupTime >= spawnCooldown)
             {
                 active.Value = true;
             }
@@ -38,22 +37,16 @@ public class HPBubble : NetworkBehaviour
     private void ToggleStatus(bool previousValue, bool newValue)
     {
         meshRenderer.enabled = active.Value;
-        sphereCollider.enabled = active.Value;
+        collider.enabled = active.Value;
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (networkManager.IsHost || networkManager.IsServer)
-        {            
-            HealthSystem healthSystem = other.GetComponent<HealthSystem>();
-            if(healthSystem != null)
-            {
-                if (healthSystem.currentHealth.Value < healthSystem.maxHealth)
-                {
-                    active.Value = false;
-                    pickupTime.Value = Time.time;
-                }
-            }
+        {
+            Pickup(other);
         }
     }
+
+    protected abstract void Pickup(Collider collision);
 }
