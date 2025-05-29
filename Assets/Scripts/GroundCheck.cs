@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class GroundCheck : MonoBehaviour
 {
-    [SerializeField] private LayerMask layerMask;
-
     private NetworkObject networkObject;
     private PlayerMovement playerMovement;
 
@@ -22,10 +20,7 @@ public class GroundCheck : MonoBehaviour
     {
         if(networkObject.IsLocalPlayer)
         {
-            if(((layerMask & (1 << other.gameObject.layer)) != 0))
-            {
-                playerMovement.grounded = true;
-            }
+            playerMovement.grounded = true;
         }
     }
 
@@ -33,10 +28,7 @@ public class GroundCheck : MonoBehaviour
     {
         if (networkObject.IsLocalPlayer)
         {
-            if (((layerMask & (1 << other.gameObject.layer)) != 0))
-            {
-                playerMovement.grounded = false;
-            }
+            playerMovement.grounded = false;
         }
     }
 }
