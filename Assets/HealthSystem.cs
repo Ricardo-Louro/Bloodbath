@@ -5,6 +5,7 @@ using System.Collections;
 public class HealthSystem : MonoBehaviour
 {
     private NetworkManager networkManager;
+    private NetworkObject networkObject;
     private SpawnSystem spawnSystem;
 
     public NetworkVariable<bool> alive { get; private set; } = new NetworkVariable<bool>();
@@ -12,13 +13,15 @@ public class HealthSystem : MonoBehaviour
     public int maxHealth { get; private set; } = 100;
     private int maxOverhealth = 200;
 
-    [SerializeField] private GameObject model;
+    [SerializeField] private GameObject[] models;
     private Collider playerCollider;
 
     private void Start()
     {
         networkManager = FindFirstObjectByType<NetworkManager>();
+        networkObject = GetComponent<NetworkObject>();
         spawnSystem = FindFirstObjectByType<SpawnSystem>();
+
 
         currentHealth.OnValueChanged += CheckForDeath;
 
@@ -52,8 +55,14 @@ public class HealthSystem : MonoBehaviour
 
     private void ToggleDeathComponents(bool previousValue, bool currentValue)
     {
-        model.SetActive(alive.Value);
-        GetComponent<Collider>().enabled = alive.Value;
+        if(!networkObject.IsLocalPlayer)
+        {
+            foreach(GameObject model in models)
+            {
+                model.SetActive(alive.Value);
+            }
+            GetComponent<Collider>().enabled = alive.Value;
+        }
 
         if(networkManager.IsServer && !alive.Value)
         {
