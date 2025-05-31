@@ -23,9 +23,12 @@ public class CameraController : MonoBehaviour
 
     private void MoveCamera()
     {
-        Vector3 pos = player.transform.position;
-        pos.y += heightOffset;
-        transform.position = pos;
+        if(player != null)
+        {
+            Vector3 pos = player.transform.position;
+            pos.y += heightOffset;
+            transform.position = pos;
+        }
     }
 
     private void RotateCamera()
