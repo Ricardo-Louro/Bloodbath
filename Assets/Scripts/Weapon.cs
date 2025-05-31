@@ -35,27 +35,45 @@ public class Weapon : NetworkBehaviour
             if(Input.GetKeyDown(KeyCode.Mouse0) && Time.time - lastTimeShot >= fireCooldown)
             {
                 lastTimeShot = Time.time;
-                Shoot();
+                if(networkManager.IsHost)
+                {
+                    ShootInServer();
+                }
+                else
+                {
+                    ShootInClient();
+                }
             }
         }
     }
 
-    private void Shoot()
+    private void ShootInClient()
     {
-        //DO THE LINE
         RaycastHit hit;
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, Mathf.Infinity, layerMask))
         {
             DrawLineRenderer(uiWeapon.firingTransform.position, hit.point);
-        }
-        else
-        {
         }
 
         //DO THE NOISE
 
         //INFORM THE SERVER TO CALCULATE THE SHOOTING AND THE THE LINE AND NOISE
         CheckForHitServerRpc(Camera.main.transform.position, Camera.main.transform.forward);
+    }
+
+    private void ShootInServer()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, Mathf.Infinity, layerMask))
+        {
+            DrawLineRenderer(uiWeapon.firingTransform.position, hit.point);
+            HealthSystem healthSystem = hit.collider.GetComponent<HealthSystem>();
+            if (healthSystem != null)
+            {
+                healthSystem.LoseHealth(damage);
+            }
+        }
+        DrawLineInClientRpc(hit.point);
     }
 
     [ServerRpc]
@@ -74,6 +92,12 @@ public class Weapon : NetworkBehaviour
         DrawLineRenderer(firingPosition.position, hit.point);
     }
 
+    [ClientRpc]
+    private void DrawLineInClientRpc(Vector3 hitpoint)
+    {
+        DrawLineRenderer(firingPosition.position, hitpoint);
+    }
+
     private void DrawLineRenderer(Vector3 origin, Vector3 end)
     {
         lineRenderer.positionCount = 2;
@@ -86,4 +110,5 @@ public class Weapon : NetworkBehaviour
         yield return new WaitForSeconds(fireCooldown);
         lineRenderer.positionCount = 0;
     }
+
 }

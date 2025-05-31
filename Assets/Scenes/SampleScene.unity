@@ -375,7 +375,7 @@ MonoBehaviour:
   playerPrefab: {fileID: 0}
   spawnPoints: []
   textJoinCode: {fileID: 143311129}
-  joinCode: 76RHCQ
+  joinCode: NBGFNL
   isServer: 0
 --- !u!1 &330585543
 GameObject:
