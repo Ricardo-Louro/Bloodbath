@@ -63,33 +63,49 @@ public class Weapon : NetworkBehaviour
 
     private void ShootInServer()
     {
-        RaycastHit hit;
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, Mathf.Infinity, layerMask))
+        HealthSystem healthSystem;
+        RaycastHit[] raycastHits = Physics.RaycastAll(Camera.main.transform.position, Camera.main.transform.forward, Mathf.Infinity, layerMask);
+        OrderRaycastHitsByClosest(raycastHits, Camera.main.transform.position);
+
+        foreach(RaycastHit hit in raycastHits)
         {
-            DrawLineRenderer(uiWeapon.firingTransform.position, hit.point);
-            HealthSystem healthSystem = hit.collider.GetComponent<HealthSystem>();
-            if (healthSystem != null)
+            if(hit.collider.gameObject != transform.parent.gameObject)
             {
-                healthSystem.LoseHealth(damage);
+                healthSystem = hit.collider.GetComponent<HealthSystem>();
+            
+                if(healthSystem != null)
+                {
+                    healthSystem.LoseHealth(damage);
+                }
+
+                DrawLineInClientRpc(hit.point);
+                break;
             }
         }
-        DrawLineInClientRpc(hit.point);
     }
 
     [ServerRpc]
     private void CheckForHitServerRpc(Vector3 origin, Vector3 direction)
     {
         HealthSystem healthSystem;
-        RaycastHit hit;
-        if(Physics.Raycast(origin, direction, out hit, Mathf.Infinity, layerMask))
+        RaycastHit[] raycastHits = Physics.RaycastAll(origin, direction, Mathf.Infinity, layerMask);
+        OrderRaycastHitsByClosest(raycastHits, origin);
+
+        foreach(RaycastHit hit in raycastHits)
         {
-            healthSystem = hit.collider.GetComponent<HealthSystem>();
-            if(healthSystem != null)
+            if(hit.collider.gameObject != transform.parent.gameObject)
             {
-                healthSystem.LoseHealth(damage);
+                healthSystem = hit.collider.GetComponent<HealthSystem>();
+            
+                if(healthSystem != null)
+                {
+                    healthSystem.LoseHealth(damage);
+                }
+
+                DrawLineRenderer(firingPosition.position, hit.point);
+                break;
             }
         }
-        DrawLineRenderer(firingPosition.position, hit.point);
     }
 
     [ClientRpc]
@@ -103,6 +119,31 @@ public class Weapon : NetworkBehaviour
         lineRenderer.positionCount = 2;
         lineRenderer.SetPositions(new Vector3[]{ origin, end });
         StartCoroutine(ClearLineRenderer());
+    }
+
+    private RaycastHit[] OrderRaycastHitsByClosest(RaycastHit[] raycastHits, Vector3 originPosition)
+    {
+        for (int hitIndex = 0; hitIndex < raycastHits.Length; hitIndex++)
+        {
+            int minIndex = hitIndex;
+
+            for (int selectionIndex = hitIndex + 1; selectionIndex < raycastHits.Length; selectionIndex++)
+            {
+                if ((raycastHits[selectionIndex].point - originPosition).magnitude <
+                    (raycastHits[minIndex].point - originPosition).magnitude)
+                {
+                    minIndex = selectionIndex;
+                }
+            }
+            
+            if(minIndex != hitIndex)
+            {
+                RaycastHit tempHit = raycastHits[hitIndex];
+                raycastHits[hitIndex] = raycastHits[minIndex];
+                raycastHits[minIndex] = tempHit;
+            }
+        }
+        return raycastHits;
     }
 
     private IEnumerator ClearLineRenderer()
