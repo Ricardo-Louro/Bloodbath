@@ -273,7 +273,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &183443574
 Transform:
   m_ObjectHideFlags: 0
@@ -1023,7 +1023,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6f61bcce8c30304192a1fac2a9d8d32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnPoints: []
+  spawnPoints:
+  - {fileID: 423475460}
+  - {fileID: 1228211799}
 --- !u!4 &1675865817
 Transform:
   m_ObjectHideFlags: 0

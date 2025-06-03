@@ -25,7 +25,7 @@ public abstract class Pickable : NetworkBehaviour
 
     private void Update()
     {
-        if (networkManager.IsHost || networkManager.IsServer)
+        if (networkManager.IsHost)
         {
             if (!active.Value && Time.time - pickupTime >= spawnCooldown)
             {
@@ -42,7 +42,7 @@ public abstract class Pickable : NetworkBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (networkManager.IsHost || networkManager.IsServer)
+        if (networkManager.IsHost)
         {
             Pickup(other);
         }

@@ -110,5 +110,4 @@ public class Weapon : NetworkBehaviour
         yield return new WaitForSeconds(fireCooldown);
         lineRenderer.positionCount = 0;
     }
-
 }

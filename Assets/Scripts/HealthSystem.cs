@@ -35,6 +35,8 @@ public class HealthSystem : MonoBehaviour
         alive.OnValueChanged += ToggleDeathComponents;
 
         playerCollider = GetComponent<Collider>();
+
+        spawnSystem.MoveToSpawnPoint(gameObject);
     }
 
     private void CheckForDeath(int previousValue, int currentValue)
@@ -87,6 +89,6 @@ public class HealthSystem : MonoBehaviour
         alive.Value = true;
         currentHealth.Value = maxHealth;
 
-        spawnSystem.MoveToSpawnPoint(this.gameObject);
+        spawnSystem.MoveToSpawnPoint(gameObject);
     }
 }

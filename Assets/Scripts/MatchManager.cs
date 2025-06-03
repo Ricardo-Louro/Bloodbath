@@ -16,7 +16,7 @@ public class MatchManager : MonoBehaviour
 
     private void Update()
     {
-        if (networkManager.IsHost || networkManager.IsServer)
+        if (networkManager.IsHost)
         {
             timer.Value = Mathf.Max(timer.Value - Time.deltaTime, 0);
 
