@@ -5,7 +5,7 @@ public abstract class Pickable : NetworkBehaviour
 {
     private NetworkManager networkManager;
     private MeshRenderer meshRenderer;
-    private new Collider collider;
+    private Collider objCollider;
 
     private NetworkVariable<bool> active = new NetworkVariable<bool>();
     private float pickupTime;
@@ -16,7 +16,7 @@ public abstract class Pickable : NetworkBehaviour
         networkManager = FindFirstObjectByType<NetworkManager>();
         
         meshRenderer = GetComponent<MeshRenderer>();
-        collider = GetComponent<Collider>();
+        objCollider = GetComponent<Collider>();
 
         active.Value = true;
 
@@ -37,7 +37,7 @@ public abstract class Pickable : NetworkBehaviour
     private void ToggleStatus(bool previousValue, bool newValue)
     {
         meshRenderer.enabled = active.Value;
-        collider.enabled = active.Value;
+        GetComponent<Collider>().enabled = active.Value;
     }
 
     private void OnTriggerEnter(Collider other)

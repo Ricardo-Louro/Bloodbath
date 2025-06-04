@@ -2,15 +2,15 @@ using Unity.Netcode;
 using UnityEngine;
 using System.Collections;
 
-public class HealthSystem : MonoBehaviour
+public class HealthSystem : NetworkBehaviour
 {
     private NetworkManager networkManager;
     private NetworkObject networkObject;
     private SpawnSystem spawnSystem;
     private MatchManager matchManager;
 
-    public NetworkVariable<bool> alive { get; private set; } = new NetworkVariable<bool>();
-    public NetworkVariable<int> currentHealth { get; private set; } = new NetworkVariable<int>();
+    public NetworkVariable<bool> alive = new NetworkVariable<bool>(true);
+    public NetworkVariable<int> currentHealth = new NetworkVariable<int>(75);
     public int maxHealth { get; private set; } = 100;
     private int maxOverhealth = 200;
 
@@ -26,22 +26,26 @@ public class HealthSystem : MonoBehaviour
 
         matchManager.AddToDictionary(this);
 
-        alive.Value = true;
-        currentHealth.Value = 75;
-
-
-        currentHealth.OnValueChanged += CheckForDeath;
-
-        alive.OnValueChanged += ToggleDeathComponents;
-
         playerCollider = GetComponent<Collider>();
 
-        spawnSystem.MoveToSpawnPoint(gameObject);
+        spawnSystem.RequestMoveToSpawnPointClientRpc(gameObject);
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        currentHealth.OnValueChanged += CheckForDeath;
+        alive.OnValueChanged += ToggleDeathComponents;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        currentHealth.OnValueChanged -= CheckForDeath;
+        alive.OnValueChanged -= ToggleDeathComponents;
     }
 
     private void CheckForDeath(int previousValue, int currentValue)
     {
-        if (currentHealth.Value <= 0)
+        if (currentHealth.Value <= 0 && networkManager.IsHost)
         {
             alive.Value = false;
         }
@@ -64,31 +68,38 @@ public class HealthSystem : MonoBehaviour
 
     private void ToggleDeathComponents(bool previousValue, bool currentValue)
     {
-        if(!networkObject.IsLocalPlayer)
+        if (!networkObject.IsLocalPlayer)
         {
-            foreach(GameObject model in models)
+            foreach (GameObject model in models)
             {
-                model.SetActive(alive.Value);
+                model.SetActive(currentValue);
             }
-            GetComponent<Collider>().enabled = alive.Value;
-            matchManager.Score(this);
+
+            GetComponent<Collider>().enabled = currentValue;
         }
 
-        if(networkManager.IsServer && !alive.Value)
+        if (networkManager.IsHost && !currentValue)
         {
-            //UPDATE SCORE
-            //GIB EXPLOSION
+           // matchManager.Score(this);
+        }
+
+        if (!currentValue)
+        {
             StartCoroutine(QueueRespawn());
         }
     }
 
     private IEnumerator QueueRespawn()
     {
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(2);
+        spawnSystem.RequestMoveToSpawnPointClientRpc(gameObject);
+        RequestRespawnServerRpc();
+    }
 
+    [ServerRpc]
+    private void RequestRespawnServerRpc()
+    {
+        currentHealth.Value = 75;
         alive.Value = true;
-        currentHealth.Value = maxHealth;
-
-        spawnSystem.MoveToSpawnPoint(gameObject);
     }
 }
