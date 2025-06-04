@@ -1,6 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class HealthSystem : NetworkBehaviour
 {
@@ -16,6 +17,7 @@ public class HealthSystem : NetworkBehaviour
 
     [SerializeField] private GameObject[] models;
     private Collider playerCollider;
+    private UIWeapon uiWeapon;
 
     private void Start()
     {
@@ -23,6 +25,8 @@ public class HealthSystem : NetworkBehaviour
         networkObject = GetComponent<NetworkObject>();
         spawnSystem = FindFirstObjectByType<SpawnSystem>();
         matchManager = FindFirstObjectByType<MatchManager>();
+
+        uiWeapon = FindFirstObjectByType<UIWeapon>();
 
         matchManager.AddToDictionary(this);
 
@@ -76,6 +80,10 @@ public class HealthSystem : NetworkBehaviour
             }
 
             GetComponent<Collider>().enabled = currentValue;
+        }
+        else
+        {
+            uiWeapon.weaponModel.SetActive(currentValue);
         }
 
         if (networkManager.IsHost && !currentValue)

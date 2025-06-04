@@ -1330,6 +1330,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firingTransform: {fileID: 3190340320167323741}
+  weaponModel: {fileID: 2523681125641298604}
 --- !u!4 &310522710908879022
 Transform:
   m_ObjectHideFlags: 0

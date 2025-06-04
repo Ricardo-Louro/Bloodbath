@@ -1977,7 +1977,7 @@ MonoBehaviour:
   playerPrefab: {fileID: 9061756974803468670, guid: 1ffedf3cbc2c39244a3228c6988019fc, type: 3}
   textJoinCode: {fileID: 6306129}
   inputJoinCode: {fileID: 645001078}
-  sceneToLoad: SampleScene
+  sceneToLoad: Gameplay
 --- !u!4 &1897588130
 Transform:
   m_ObjectHideFlags: 0
