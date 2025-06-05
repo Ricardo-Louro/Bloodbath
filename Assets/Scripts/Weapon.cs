@@ -18,6 +18,11 @@ public class Weapon : NetworkBehaviour
     [SerializeField] private float fireCooldown;
     private float lastTimeShot = 0;
 
+    [SerializeField] private AudioClip audioClip;
+    private AudioSource audioSource;
+
+    private HealthSystem healthSystem;
+
 
 
     private void Start()
@@ -26,11 +31,15 @@ public class Weapon : NetworkBehaviour
         networkObject = GetComponentInParent<NetworkObject>();
 
         uiWeapon = FindFirstObjectByType<UIWeapon>();
+
+        audioSource = GetComponent<AudioSource>();
+
+        healthSystem = GetComponentInParent<HealthSystem>();
     }
 
     private void Update()
     {
-        if(networkObject.IsLocalPlayer)
+        if(networkObject.IsLocalPlayer && healthSystem.alive.Value)
         {
             if(Input.GetKeyDown(KeyCode.Mouse0) && Time.time - lastTimeShot >= fireCooldown)
             {
@@ -54,8 +63,10 @@ public class Weapon : NetworkBehaviour
         {
             DrawLineRenderer(uiWeapon.firingTransform.position, hit.point);
         }
-
-        //DO THE NOISE
+        else
+        {
+            DrawLineRenderer(uiWeapon.firingTransform.position, uiWeapon.firingTransform.position + Camera.main.transform.forward * 50);
+        }
 
         //INFORM THE SERVER TO CALCULATE THE SHOOTING AND THE THE LINE AND NOISE
         CheckForHitServerRpc(Camera.main.transform.position, Camera.main.transform.forward);
@@ -78,9 +89,16 @@ public class Weapon : NetworkBehaviour
                     healthSystem.LoseHealth(damage);
                 }
 
+                DrawLineRenderer(uiWeapon.firingTransform.position, hit.point);
                 DrawLineInClientRpc(hit.point);
                 break;
             }
+        }
+
+        if (raycastHits.Length == 0)
+        {
+            DrawLineRenderer(uiWeapon.firingTransform.position, uiWeapon.transform.position + Camera.main.transform.forward * 50);
+            DrawLineInClientRpc(uiWeapon.transform.position + Camera.main.transform.forward * 50);
         }
     }
 
@@ -106,16 +124,25 @@ public class Weapon : NetworkBehaviour
                 break;
             }
         }
+
+        if (raycastHits.Length == 0)
+        {
+            DrawLineRenderer(firingPosition.position, direction * 50);
+        }
     }
 
     [ClientRpc]
     private void DrawLineInClientRpc(Vector3 hitpoint)
     {
-        DrawLineRenderer(firingPosition.position, hitpoint);
+        if(!networkManager.IsHost)
+        {
+            DrawLineRenderer(firingPosition.position, hitpoint);
+        }
     }
 
     private void DrawLineRenderer(Vector3 origin, Vector3 end)
     {
+        audioSource.PlayOneShot(audioClip);
         lineRenderer.positionCount = 2;
         lineRenderer.SetPositions(new Vector3[]{ origin, end });
         StartCoroutine(ClearLineRenderer());

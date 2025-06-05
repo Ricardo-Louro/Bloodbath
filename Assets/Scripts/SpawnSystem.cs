@@ -8,6 +8,7 @@ public class SpawnSystem : MonoBehaviour
     [ClientRpc]
     public void RequestMoveToSpawnPointClientRpc(GameObject player)
     {
-        player.transform.position = spawnPoints[Random.Range(0, spawnPoints.Length)].position;
+        Transform randomSpawn = spawnPoints[Random.Range(0, spawnPoints.Length)];
+        player.transform.position = randomSpawn.position;
     }
 }

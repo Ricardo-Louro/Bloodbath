@@ -60,6 +60,10 @@ public class PlayerMovement : MonoBehaviour
 
             rb.linearVelocity = vel;
         }
+        else
+        {
+            rb.linearVelocity = Vector3.zero;
+        }
     }
 
     private void AssignCamera()

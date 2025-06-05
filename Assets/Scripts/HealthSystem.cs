@@ -99,8 +99,9 @@ public class HealthSystem : NetworkBehaviour
 
     private IEnumerator QueueRespawn()
     {
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(1);
         spawnSystem.RequestMoveToSpawnPointClientRpc(gameObject);
+        yield return new WaitForSeconds(1);
         RequestRespawnServerRpc();
     }
 
