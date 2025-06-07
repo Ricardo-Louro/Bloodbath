@@ -100,42 +100,7 @@ O script informa a câmera de qual é o prefab correspondente ao jogador local e d
 
 ## Diagrama de Arquitetura de Redes
 
-flowchart TD
-
-    Start[Start] --> Awake[Awake() - Setup]
-    Awake --> Role{Choose Role}
-    Role -->|Host| HostGame[HostGame()]
-    Role -->|Client| JoinGame[JoinGame()]
-
-    HostGame --> StartHostCR[StartAsHostCR()]
-    JoinGame --> StartClientCR[StartAsClientCR()]
-
-    StartHostCR --> RelayCheckHost{Is Relay?}
-    StartClientCR --> RelayCheckClient{Is Relay?}
-
-    RelayCheckHost -->|Yes| LoginHost[Login()]
-    RelayCheckClient -->|Yes| LoginClient[Login()]
-
-    LoginHost --> CreateAlloc[CreateAllocation()]
-    CreateAlloc --> GetJoinCode[GetJoinCode()]
-    GetJoinCode --> ConfigHost[Configure Transport (Host)]
-
-    LoginClient --> JoinAlloc[JoinAllocation()]
-    JoinAlloc --> ConfigClient[Configure Transport (Client)]
-
-    ConfigHost --> StartHost[StartHost()]
-    ConfigClient --> StartClient[StartClient()]
-
-    StartHost --> OnClientConnected[OnClientConnectedCallback]
-    OnClientConnected --> EnoughClients{Enough Clients?}
-    EnoughClients -->|Yes| LoadScene[LoadScene(sceneToLoad)]
-    LoadScene --> SceneLoaded[OnSceneLoadComplete()]
-    SceneLoaded --> SpawnPlayers[SpawnPlayer() for each client]
-    SpawnPlayers --> Done[Done]
-
-    StartClient --> WaitHostLoad[Wait for Host scene load]
-    WaitHostLoad --> Done
-
+<img src="/ReadmeImages/AND.png" width="300">
 
 
 ## Bibliografia
