@@ -103,7 +103,14 @@ Este script escolhe informa os clientes (o cliente tem autoridade sobre o transf
 
 --------------------------------------------------------------------------------
 
-###
+### UIWeapon.cs
+
+Este script é bastante simples, contendo apenas informações importantes para outros scripts, nomeadamente o Transform de onde o line renderer terá de originar no tiro em primeira pessoa (utilizado na classe Weapon) e o GameObject do modelo da arma que é desativado durante a morte e re-ativado após o respawn (utilizado na class HealthSystem).
+
+--------------------------------------------------------------------------------
+
+### Weapon.cs
+
 
 
 ## Diagrama de Arquitetura de Redes
