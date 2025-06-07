@@ -1,12 +1,6 @@
-o Descrição de mensagens de rede
-o Análise de largura de banda/custo/etc
-o Diagrama de arquitectura de redes
-o Diagrama de protocolo
-
 # Sistemas de Redes para Jogos - Projecto Final
 
 ## Autoria
-
 - Ricardo Louro (21807601)
   
 
@@ -47,12 +41,7 @@ Adicionalmente, em caso de morte, também chama o Respawn do jogador que após alg
 ### NetworkSetup.cs
 
 
-
 ## Diagrama de Arquitetura de Redes
-
-
-
---------------------------------------------------------------------------------
 
 ## Bibliografia
 
