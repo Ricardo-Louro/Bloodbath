@@ -101,6 +101,7 @@ O script informa a câmera de qual é o prefab correspondente ao jogador local e d
 ## Diagrama de Arquitetura de Redes
 
 flowchart TD
+
     Start[Start] --> Awake[Awake() - Setup]
     Awake --> Role{Choose Role}
     Role -->|Host| HostGame[HostGame()]
