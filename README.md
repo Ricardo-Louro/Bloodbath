@@ -24,7 +24,11 @@ Este script informa o jogador controlado pelo cliente local (e apenas esse jogad
 Este script herda da classe Pickable e seria utilizado na criação de um item que recupera vida ao jogador.
 O script é funcional e existe esse item nos Prefabs no jogo mas devido ao game design, não foi utilizado.
 
-
+### HealthSystem.cs
+Este script controla os pontos de vida do personagem, a manipulação destes e o processo de vida e morte.
+Quando os pontos de vida do jogador mudam, este verifica se eles são menores ou iguais a 0. Caso esse seja o caso, muda o estado atual do jogo para morto (alive = false)
+Quando o estado de vida do jogador muda, este dá toggle dos componentes visuais quer dos clientes dos outros (componentes que estão desativados sempre na visão em primeira pessoa) quer do cliente do jogador local (a UI Weapon que encontra-se ligada à camera que é utilizada localmente por cada jogador no seu cliente).
+Adicionalmente, em caso de morte, também chama o Respawn do jogador que após algum tempo comunica com a classe SpawnSystem para mover o jogador morto para um spawn point e, de seguida, reviver o jogador ao mudar a sua vida de 0 para 75 e mudar o estado de alive para true o que levará ao toggle dos componentes visuais.
 
 ### NetworkSetup.cs
 
@@ -38,7 +42,7 @@ O script é funcional e existe esse item nos Prefabs no jogo mas devido ao game d
 
 ## Bibliografia
 
-[Base Unity Documentation](https://docs.unity3d.com/ScriptReference/)
-[Unity Netcode Documentation](https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@2.4/api/index.html)
-[Playlist das Aulas - Diogo Andrade](https://www.youtube.com/watch?v=Ql9hg1mvBRM&list=PLheBz0T_uVP3JaTA4wMs38MgOKiIpDpLG)
-[ChatGPT](https://chatgpt.com/)
+- [Base Unity Documentation](https://docs.unity3d.com/ScriptReference/)
+- [Unity Netcode Documentation](https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@2.4/api/index.html)
+- [Playlist das Aulas - Diogo Andrade](https://www.youtube.com/watch?v=Ql9hg1mvBRM&list=PLheBz0T_uVP3JaTA4wMs38MgOKiIpDpLG)
+- [ChatGPT](https://chatgpt.com/)
