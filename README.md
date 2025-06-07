@@ -23,7 +23,7 @@ Este script informa o jogador controlado pelo cliente local (e apenas esse jogad
 ### HealthPickup.cs - UNUSED
 Este script herda da classe Pickable e seria utilizado na criação de um item que recupera vida ao jogador.
 
-O script é funcional e existe esse item nos Prefabs no jogo mas devido ao game design, não foi utilizado.
+O script é funcional (precisaria apenas de verificar se o jogador falta vida suficiente para o utilizar) e existe esse item nos Prefabs no jogo mas devido ao game design, não foi utilizado.
 
 --------------------------------------------------------------------------------
 
@@ -66,6 +66,14 @@ Caso o jogador seja apenas um Cliente e use o Relay Server do Unity, ele pode in
 Quando o número desejado de jogadores estiver connectado, o Host irá começar o jogo ao transicionar para a cena de Gameplay, instanciar um Player prefab para cada cliente e dar a ownership destes ao cliente correspondente.
 
 Foi o script mais desafiante do projeto e exigiu bastantes horas de debug e testes com o auxilio do ChatGPT e dos vídeos do professor, nomeadamente bastante baseado no script com o mesmo nome feito para o projeto WyzardsMP.
+
+--------------------------------------------------------------------------------
+
+### OverhealthPickup.cs - UNUSED
+
+Este script, tal como o HealthPickup.cs, herda da classe Pickable e seria utilizado na criação de um item que recupera vida ao jogador acima do limite máximo de vida.
+
+O script é funcional e pronto para ser implementado (precisaria apenas de verificar se o jogador falta vida suficiente para o utilizar) mas por motivos de game design, não foi utilizado.
 
 --------------------------------------------------------------------------------
 
