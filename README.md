@@ -38,6 +38,17 @@ Adicionalmente, em caso de morte, também chama o Respawn do jogador que após alg
 
 --------------------------------------------------------------------------------
 
+### MainMenuHandler.cs
+Este script gere a funcionalidade dos elementos de UI no Menu Principal.
+
+Contém os métodos que alteram o estado dos GameObjects neste de forma a o jogador conseguir navegar pelas opções necessárias para inicializar o jogo.
+
+--------------------------------------------------------------------------------
+
+###
+
+--------------------------------------------------------------------------------
+
 ### NetworkSetup.cs
 
 
