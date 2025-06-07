@@ -77,6 +77,14 @@ O script é funcional e pronto para ser implementado (precisaria apenas de verifi
 
 --------------------------------------------------------------------------------
 
+### Pickable.cs - UNUSED
+
+Este script abstract serve como a base para todos os potenciais Pickups do jogo.
+
+Este pode apenas ser apanhado no Host (para evitar multiplos triggers dos seus efeitos) e quando entra em contact com um jogador, aplica o seu efeito Pickup (para ser definido na classe especifica que herdar desta) e desativa quer o seu modelo quer o seu collider.
+
+O objeto tem em conta o tempo que passou desde que aplicou o seu efeito e mantém-se desativado até o seu cooldown (definido via SerializeField) acabar. Após isto, volta a ser ativo e poderá ser utilizado novamente.
+
 
 ## Diagrama de Arquitetura de Redes
 
