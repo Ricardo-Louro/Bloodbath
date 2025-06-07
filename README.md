@@ -19,13 +19,16 @@ Assim sendo, este script possui uma referência a um PlayerMovement no qual o jog
 
 Esta pode ser rodada através de movimento do rato e atualiza a rotação do jogador.
 
+
 ### GroundCheck.cs
 Este script informa o jogador controlado pelo cliente local (e apenas esse jogador) se está em contact com o chão ou não através do valor de um bool contido no PlayerMovement.
+
 
 ### HealthPickup.cs - UNUSED
 Este script herda da classe Pickable e seria utilizado na criação de um item que recupera vida ao jogador.
 
 O script é funcional e existe esse item nos Prefabs no jogo mas devido ao game design, não foi utilizado.
+
 
 ### HealthSystem.cs
 Este script controla os pontos de vida do personagem, a manipulação destes e o processo de vida e morte.
