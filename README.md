@@ -45,7 +45,14 @@ Contém os métodos que alteram o estado dos GameObjects neste de forma a o jogado
 
 --------------------------------------------------------------------------------
 
-###
+### MatchManager.cs - UNUSED
+Este script controla o timer da match e o score de cada jogador.
+
+Quando o timer chega ao fim, calcula qual dos jogadores ganhou (ou multiplos) e devolve uma lista com os vencedores.
+
+De seguida, chama um método que iria mostrar os components de UI necessários para informar os jogadores dos vencedores e dos scores.
+
+Por motivos de restrições de tempo e scope, este script não foi completo e implementado.
 
 --------------------------------------------------------------------------------
 
