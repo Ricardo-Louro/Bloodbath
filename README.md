@@ -57,6 +57,17 @@ Por motivos de restrições de tempo e scope, este script não foi completo e imple
 --------------------------------------------------------------------------------
 
 ### NetworkSetup.cs
+Este script trata-se do componente mais importante do jogo que trata das ligações entre os jogadores e trata dos requisitos necessários para o começo do jogo.
+
+Caso o jogador seja o Host e use o Relay Server do Unity, o script irá criar a allocation e obter toda a informação necessária sobre esta e o Relay Server correspondente. Utilizando essa informação, o script é capaz de gerar um código que os Clientes podem introduzir para juntar-se à sessão.
+
+Caso o jogador seja apenas um Cliente e use o Relay Server do Unity, ele pode introduzir o código e juntar-se à allocation criada pelo Host com o código correspondente.
+
+Quando o número desejado de jogadores estiver connectado, o Host irá começar o jogo ao transicionar para a cena de Gameplay, instanciar um Player prefab para cada cliente e dar a ownership destes ao cliente correspondente.
+
+Foi o script mais desafiante do projeto e exigiu bastantes horas de debug e testes com o auxilio do ChatGPT e dos vídeos do professor, nomeadamente bastante baseado no script com o mesmo nome feito para o projeto WyzardsMP.
+
+--------------------------------------------------------------------------------
 
 
 ## Diagrama de Arquitetura de Redes

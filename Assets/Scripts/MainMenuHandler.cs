@@ -1,3 +1,4 @@
+//Import necessary namespaces
 using UnityEngine;
 
 public class MainMenuHandler : MonoBehaviour
