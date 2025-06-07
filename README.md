@@ -100,12 +100,11 @@ O script informa a câmera de qual é o prefab correspondente ao jogador local e d
 
 ## Diagrama de Arquitetura de Redes
 
-graph TD
-
+flowchart TD
     A[Start] --> B[Awake() - Setup]
-    B --> C{Choose Role}
-    C --> D[HostGame()]
-    C --> E[JoinGame()]
+    B --> C{Role?}
+    C -->|Host| D[HostGame()]
+    C -->|Client| E[JoinGame()]
 
     D --> F[StartAsHostCR()]
     E --> G[StartAsClientCR()]
@@ -114,26 +113,27 @@ graph TD
     G --> H
 
     H --> I[Login()]
-    
-    I --> J[CreateAllocation()] 
+
+    I -->|Host flow| J[CreateAllocation()]
     J --> K[GetJoinCode()]
     K --> L[Configure Transport (Host)]
 
-    I --> M[JoinAllocation()]
+    I -->|Client flow| M[JoinAllocation()]
     M --> N[Configure Transport (Client)]
 
     L --> O[StartHost()]
     N --> P[StartClient()]
 
     O --> Q[OnClientConnectedCallback]
-    Q --> R{Enough Clients Connected?}
-    R --> S[LoadScene(sceneToLoad)]
+    Q --> R{Enough Clients?}
+    R -->|Yes| S[LoadScene(sceneToLoad)]
     S --> T[OnSceneLoadComplete()]
     T --> U[SpawnPlayer() for each client]
+    U --> V[Done]
 
-    P --> V[Wait for Host Scene Load]
-    U --> W[Done]
-    V --> W
+    P --> W[Wait for Host scene load]
+    W --> V
+
 
 
 ## Bibliografia
