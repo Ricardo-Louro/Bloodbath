@@ -10,6 +10,8 @@ De forma a descrever o funcionamento do projeto, inclue abaixo uma descrição de 
 
 Para informações mais detalhadas, incluí comentário extrememamente detalhado em todos os scripts.
 
+--------------------------------------------------------------------------------
+
 ### CameraController.cs
 Este script faz uso de apenas os componentes manualmente selecionados serem sincronizados através da rede para utilizar a mesma câmera para cada jogador de forma local.
 
@@ -118,6 +120,8 @@ Este script é bastante simples, contendo apenas informações importantes para out
 Este script é um dos mais complexos e importantes do jogo. Ele calcula o tiro e a direção deste e informa os clientes se algo foi atingido e, se sim, o quê. Adicionalmente ativa os HealthSystems para removerem vida igual ao dano da arma caso sejam atingidos.
 
 A maior complexidade deste script vem do facto de ter de gerir o desenho do tiro em primeira pessoa (da arma de UI para o ponto do tiro) e em terceira pessoa (da arma do modelo do jogador para o ponto do tiro) e adicionalmente, gerir este tiro caso venha do servidor ou do cliente.
+
+--------------------------------------------------------------------------------
 
 ## Diagrama de Arquitetura de Redes
 
