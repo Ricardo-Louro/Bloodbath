@@ -85,8 +85,56 @@ Este pode apenas ser apanhado no Host (para evitar multiplos triggers dos seus e
 
 O objeto tem em conta o tempo que passou desde que aplicou o seu efeito e mantém-se desativado até o seu cooldown (definido via SerializeField) acabar. Após isto, volta a ser ativo e poderá ser utilizado novamente.
 
+--------------------------------------------------------------------------------
+
+### PlayerMovement.cs
+
+Este script serve para calcular o movimento do jogador local assim como desativar os componentes necessários para que a visão em primeira pessoa deste funcione corretamente.
+
+O script utiliza o facto de todos os aspetos do jogo não estarem sincronizados para simplesmente desativar os componentes visuais do jogador local de forma a que a visão em primeira pessoa funcione corretamente enquanto que para todos os outros potenciais clientes connectados, o modelo está totalmente visivel.
+
+O script informa a câmera de qual é o prefab correspondente ao jogador local e de seguida calcula o seu movimento através das teclas premidas pelo jogador. Calcula também o seu movimento vertical se for premido o espaço enquanto GroundChecker informar que o jogador encontra-se grounded.
+
+--------------------------------------------------------------------------------
+
 
 ## Diagrama de Arquitetura de Redes
+
+graph TD
+
+    A[Start] --> B[Awake() - Setup]
+    B --> C{Choose Role}
+    C --> D[HostGame()]
+    C --> E[JoinGame()]
+
+    D --> F[StartAsHostCR()]
+    E --> G[StartAsClientCR()]
+
+    F --> H{IsRelay?}
+    G --> H
+
+    H --> I[Login()]
+    
+    I --> J[CreateAllocation()] 
+    J --> K[GetJoinCode()]
+    K --> L[Configure Transport (Host)]
+
+    I --> M[JoinAllocation()]
+    M --> N[Configure Transport (Client)]
+
+    L --> O[StartHost()]
+    N --> P[StartClient()]
+
+    O --> Q[OnClientConnectedCallback]
+    Q --> R{Enough Clients Connected?}
+    R --> S[LoadScene(sceneToLoad)]
+    S --> T[OnSceneLoadComplete()]
+    T --> U[SpawnPlayer() for each client]
+
+    P --> V[Wait for Host Scene Load]
+    U --> W[Done]
+    V --> W
+
 
 ## Bibliografia
 
