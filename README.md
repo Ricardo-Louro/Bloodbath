@@ -97,6 +97,14 @@ O script informa a câmera de qual é o prefab correspondente ao jogador local e d
 
 --------------------------------------------------------------------------------
 
+### SpawnSystem.cs
+
+Este script escolhe informa os clientes (o cliente tem autoridade sobre o transform do player a que corresponde) para escolherem um spawn point aleatório e enviarem o jogador em questão para esta localização. Apenas o cliente a que esse jogador corresponde irá ser ouvido e a operação irá ocorrer apenas uma vez.
+
+--------------------------------------------------------------------------------
+
+###
+
 
 ## Diagrama de Arquitetura de Redes
 
