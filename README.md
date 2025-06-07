@@ -101,38 +101,39 @@ O script informa a câmera de qual é o prefab correspondente ao jogador local e d
 ## Diagrama de Arquitetura de Redes
 
 flowchart TD
-    A[Start] --> B[Awake() - Setup]
-    B --> C{Role?}
-    C -->|Host| D[HostGame()]
-    C -->|Client| E[JoinGame()]
+    Start[Start] --> Awake[Awake() - Setup]
+    Awake --> Role{Choose Role}
+    Role -->|Host| HostGame[HostGame()]
+    Role -->|Client| JoinGame[JoinGame()]
 
-    D --> F[StartAsHostCR()]
-    E --> G[StartAsClientCR()]
+    HostGame --> StartHostCR[StartAsHostCR()]
+    JoinGame --> StartClientCR[StartAsClientCR()]
 
-    F --> H{IsRelay?}
-    G --> H
+    StartHostCR --> RelayCheckHost{Is Relay?}
+    StartClientCR --> RelayCheckClient{Is Relay?}
 
-    H --> I[Login()]
+    RelayCheckHost -->|Yes| LoginHost[Login()]
+    RelayCheckClient -->|Yes| LoginClient[Login()]
 
-    I -->|Host flow| J[CreateAllocation()]
-    J --> K[GetJoinCode()]
-    K --> L[Configure Transport (Host)]
+    LoginHost --> CreateAlloc[CreateAllocation()]
+    CreateAlloc --> GetJoinCode[GetJoinCode()]
+    GetJoinCode --> ConfigHost[Configure Transport (Host)]
 
-    I -->|Client flow| M[JoinAllocation()]
-    M --> N[Configure Transport (Client)]
+    LoginClient --> JoinAlloc[JoinAllocation()]
+    JoinAlloc --> ConfigClient[Configure Transport (Client)]
 
-    L --> O[StartHost()]
-    N --> P[StartClient()]
+    ConfigHost --> StartHost[StartHost()]
+    ConfigClient --> StartClient[StartClient()]
 
-    O --> Q[OnClientConnectedCallback]
-    Q --> R{Enough Clients?}
-    R -->|Yes| S[LoadScene(sceneToLoad)]
-    S --> T[OnSceneLoadComplete()]
-    T --> U[SpawnPlayer() for each client]
-    U --> V[Done]
+    StartHost --> OnClientConnected[OnClientConnectedCallback]
+    OnClientConnected --> EnoughClients{Enough Clients?}
+    EnoughClients -->|Yes| LoadScene[LoadScene(sceneToLoad)]
+    LoadScene --> SceneLoaded[OnSceneLoadComplete()]
+    SceneLoaded --> SpawnPlayers[SpawnPlayer() for each client]
+    SpawnPlayers --> Done[Done]
 
-    P --> W[Wait for Host scene load]
-    W --> V
+    StartClient --> WaitHostLoad[Wait for Host scene load]
+    WaitHostLoad --> Done
 
 
 
